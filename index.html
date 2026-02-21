@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notify — LiveTV Pro</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@300;400;500&family=Geist:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg:        #09090b;
+  --surface:   #0f0f12;
+  --surface2:  #141418;
+  --border:    rgba(255,255,255,0.06);
+  --border2:   rgba(255,255,255,0.1);
+  --text:      #f0f0f0;
+  --muted:     #52525b;
+  --muted2:    #71717a;
+  --accent:    #f97316;
+  --accent2:   #fb923c;
+  --glow:      rgba(249,115,22,0.15);
+  --glow2:     rgba(249,115,22,0.06);
+  --success:   #34d399;
+  --s-glow:    rgba(52,211,153,0.08);
+  --error:     #f87171;
+  --e-glow:    rgba(248,113,113,0.08);
+  --serif:     'Instrument Serif', Georgia, serif;
+  --mono:      'Geist Mono', monospace;
+  --sans:      'Geist', sans-serif;
+  --radius:    14px;
+  --radius-sm: 8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 40px 20px;
+  position: relative;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 70% 10%, rgba(249,115,22,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 10% 80%, rgba(249,115,22,0.04) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.015) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.container {
+  width: 100%;
+  max-width: 460px;
+  position: relative;
+  z-index: 1;
+  animation: rise 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.header { margin-bottom: 28px; padding-left: 2px; }
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.eyebrow-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity:1; box-shadow: 0 0 8px var(--accent); }
+  50%      { opacity:0.6; box-shadow: 0 0 16px var(--accent); }
+}
+
+.eyebrow-text {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+h1 {
+  font-family: var(--serif);
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -0.5px;
+  color: #fff;
+  line-height: 1;
+  font-style: italic;
+}
+
+h1 span { font-style: normal; color: var(--muted2); font-size: 32px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.02),
+    0 32px 64px rgba(0,0,0,0.5),
+    0 0 80px rgba(249,115,22,0.03);
+}
+
+.section {
+  padding: 20px 22px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section:last-child { border-bottom: none; }
+
+.section-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 100px;
+  border: 1px solid rgba(249,115,22,0.25);
+  color: var(--accent2);
+  letter-spacing: 0.05em;
+}
+
+.drop-zone {
+  border: 1px dashed rgba(255,255,255,0.1);
+  border-radius: var(--radius-sm);
+  padding: 24px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  background: rgba(255,255,255,0.01);
+}
+
+.drop-zone:hover { border-color: rgba(249,115,22,0.4); background: var(--glow2); }
+.drop-zone.drag-over { border-color: var(--accent); background: var(--glow); transform: scale(1.01); }
+
+.drop-zone input[type="file"] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer;
+  width: 100%; height: 100%;
+}
+
+.drop-icon {
+  width: 36px; height: 36px;
+  margin: 0 auto 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border2);
+  border-radius: 10px;
+  display: grid; place-items: center;
+  color: var(--muted2);
+}
+
+.drop-primary { font-size: 13px; color: var(--muted2); }
+.drop-secondary { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 4px; }
+
+.key-loaded {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: var(--s-glow);
+  border: 1px solid rgba(52,211,153,0.15);
+  border-radius: var(--radius-sm);
+}
+
+.key-loaded.show { display: flex; }
+
+.key-check {
+  width: 22px; height: 22px;
+  background: rgba(52,211,153,0.12);
+  border-radius: 50%;
+  display: grid; place-items: center;
+  flex-shrink: 0;
+  color: var(--success);
+}
+
+.key-name {
+  flex: 1;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--success);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.key-clear {
+  background: none; border: none;
+  color: var(--muted); cursor: pointer;
+  padding: 4px; display: grid; place-items: center;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+  width: auto; margin: 0;
+}
+
+.key-clear:hover { color: var(--error); background: var(--e-glow); }
+
+.field + .field { margin-top: 12px; }
+
+.field-label {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 7px;
+}
+
+input[type="text"], input[type="url"], textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 300;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+  -webkit-appearance: none;
+}
+
+input[type="text"]:focus, input[type="url"]:focus, textarea:focus {
+  border-color: rgba(249,115,22,0.5);
+  box-shadow: 0 0 0 3px var(--glow2);
+  background: rgba(249,115,22,0.02);
+}
+
+input::placeholder, textarea::placeholder { color: var(--muted); }
+
+textarea { resize: none; height: 80px; font-family: var(--sans); }
+
+.hint { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 5px; }
+
+.priority-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+
+.priority-pill { position: relative; }
+
+.priority-pill input[type="radio"] {
+  position: absolute; opacity: 0; width: 0; height: 0;
+}
+
+.priority-pill label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 6px 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  color: var(--muted2);
+  text-align: center;
+  line-height: 1.3;
+  user-select: none;
+}
+
+.priority-pill label svg { color: var(--muted); transition: color 0.15s; }
+.priority-pill label:hover { border-color: var(--border2); color: var(--text); }
+
+.priority-pill input:checked + label {
+  background: rgba(249,115,22,0.08);
+  border-color: rgba(249,115,22,0.4);
+  color: var(--accent2);
+  box-shadow: 0 0 12px rgba(249,115,22,0.08);
+}
+
+.priority-pill input:checked + label svg { color: var(--accent); }
+
+.send-section { padding: 16px 22px 20px; }
+
+.btn-send {
+  width: 100%;
+  padding: 13px 20px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 16px rgba(249,115,22,0.2);
+}
+
+.btn-send::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.08) 0%, transparent 100%);
+  pointer-events: none;
+}
+
+.btn-send:hover:not(:disabled) {
+  background: var(--accent2);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4), 0 8px 24px rgba(249,115,22,0.3);
+}
+
+.btn-send:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 16px rgba(249,115,22,0.2);
+}
+
+.btn-send:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+.btn-spinner {
+  display: none;
+  width: 15px; height: 15px;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+.btn-send.loading .btn-spinner { display: block; }
+.btn-send.loading .btn-label { opacity: 0.8; }
+.btn-send.loading .btn-icon { display: none; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.alert {
+  display: none;
+  margin-top: 10px;
+  padding: 11px 14px;
+  border-radius: var(--radius-sm);
+  align-items: flex-start;
+  gap: 9px;
+  animation: alertIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alert.show { display: flex; }
+
+@keyframes alertIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.alert-success { background: var(--s-glow); border: 1px solid rgba(52,211,153,0.2); }
+.alert-error   { background: var(--e-glow); border: 1px solid rgba(248,113,113,0.2); }
+
+.alert-icon { flex-shrink: 0; margin-top: 1px; }
+.alert-success .alert-icon { color: var(--success); }
+.alert-error   .alert-icon { color: var(--error); }
+
+.alert-msg {
+  font-family: var(--mono); font-size: 11px;
+  line-height: 1.6; flex: 1;
+}
+
+.alert-success .alert-msg { color: var(--success); }
+.alert-error   .alert-msg { color: var(--error); }
+
+.footer {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+}
+
+.footer-id { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.06em; }
+
+.footer-scope {
+  font-family: var(--mono); font-size: 10px; color: var(--muted);
+  display: flex; align-items: center; gap: 5px;
+}
+
+.scope-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--muted); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="header">
+    <div class="eyebrow">
+      <div class="eyebrow-dot"></div>
+      <span class="eyebrow-text">Push Notification Console</span>
+    </div>
+    <h1>Notify <span>/ LiveTV</span></h1>
+  </header>
+
+  <div class="card">
+
+    <!-- Service Account -->
+    <div class="section">
+      <div class="section-label">
+        <div class="section-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Service Account
+        </div>
+        <span class="badge">JSON</span>
+      </div>
+
+      <div class="drop-zone" id="dropZone">
+        <input type="file" id="jsonFile" accept=".json">
+        <div class="drop-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="drop-primary">Drop service-account.json here</div>
+        <div class="drop-secondary">or click to browse</div>
+      </div>
+
+      <div class="key-loaded" id="keyLoaded">
+        <div class="key-check">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <span class="key-name" id="keyName"></span>
+        <button class="key-clear" id="keyClear">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Message -->
+    <div class="section">
+      <div class="section-label">
+        <div class="section-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Message
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="4" x2="12" y2="20"/></svg>
+          Title
+        </div>
+        <input type="text" id="title" placeholder="Notification title">
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+          Body
+        </div>
+        <textarea id="body" placeholder="Notification message body"></textarea>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          URL
+        </div>
+        <input type="url" id="url" placeholder="https://example.com (optional)">
+        <div class="hint">Leave empty to open the app on tap</div>
+      </div>
+    </div>
+
+    <!-- Priority -->
+    <div class="section">
+      <div class="section-label">
+        <div class="section-title">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          Priority
+        </div>
+      </div>
+
+      <div class="priority-grid">
+        <div class="priority-pill">
+          <input type="radio" name="priority" id="p-high" value="high" checked>
+          <label for="p-high">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 15l-6-6-6 6"/></svg>
+            High
+          </label>
+        </div>
+        <div class="priority-pill">
+          <input type="radio" name="priority" id="p-default" value="default">
+          <label for="p-default">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Default
+          </label>
+        </div>
+        <div class="priority-pill">
+          <input type="radio" name="priority" id="p-urgent" value="urgent">
+          <label for="p-urgent">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Urgent
+          </label>
+        </div>
+        <div class="priority-pill">
+          <input type="radio" name="priority" id="p-low" value="low">
+          <label for="p-low">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+            Low
+          </label>
+        </div>
+        <div class="priority-pill">
+          <input type="radio" name="priority" id="p-silent" value="silent">
+          <label for="p-silent">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            Silent
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Send -->
+    <div class="send-section">
+      <button class="btn-send" id="sendBtn" onclick="sendNotification()">
+        <div class="btn-spinner"></div>
+        <svg class="btn-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        <span class="btn-label">Send to All Users</span>
+      </button>
+
+      <div class="alert alert-success" id="alertSuccess">
+        <div class="alert-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div class="alert-msg" id="successMsg"></div>
+      </div>
+
+      <div class="alert alert-error" id="alertError">
+        <div class="alert-icon">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="alert-msg" id="errorMsg"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">
+    <span class="footer-id">livetv-d9b81</span>
+    <span class="footer-scope">
+      <span class="scope-dot"></span>
+      topic/all
+    </span>
+  </footer>
+
+</div>
+
+<script>
+const PROJECT_ID = 'livetv-d9b81';
+let serviceAccount = null;
+
+const dropZone = document.getElementById('dropZone');
+const jsonFile  = document.getElementById('jsonFile');
+
+dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) loadJson(e.dataTransfer.files[0]);
+});
+jsonFile.addEventListener('change', e => { if (e.target.files[0]) loadJson(e.target.files[0]); });
+
+document.getElementById('keyClear').addEventListener('click', () => {
+  serviceAccount = null;
+  document.getElementById('keyLoaded').classList.remove('show');
+  dropZone.style.display = '';
+  jsonFile.value = '';
+});
+
+function loadJson(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      serviceAccount = JSON.parse(e.target.result);
+      document.getElementById('keyName').textContent = serviceAccount.client_email || file.name;
+      document.getElementById('keyLoaded').classList.add('show');
+      dropZone.style.display = 'none';
+    } catch {
+      showError('Invalid JSON file. Please use your Firebase service-account.json.');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function b64url(data) {
+  const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+  return btoa(String.fromCharCode(...bytes))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function getAccessToken() {
+  const now     = Math.floor(Date.now() / 1000);
+  const header  = b64url(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+  const payload = b64url(JSON.stringify({
+    iss:   serviceAccount.client_email,
+    scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    aud:   'https://oauth2.googleapis.com/token',
+    iat:   now,
+    exp:   now + 3600,
+  }));
+
+  const sigInput = `${header}.${payload}`;
+  const pemKey   = serviceAccount.private_key
+    .replace('-----BEGIN PRIVATE KEY-----', '')
+    .replace('-----END PRIVATE KEY-----', '')
+    .replace(/\s/g, '');
+
+  const keyData   = Uint8Array.from(atob(pemKey), c => c.charCodeAt(0));
+  const cryptoKey = await crypto.subtle.importKey(
+    'pkcs8', keyData.buffer,
+    { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
+    false, ['sign']
+  );
+
+  const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', cryptoKey, new TextEncoder().encode(sigInput));
+  const jwt = `${sigInput}.${b64url(new Uint8Array(sig))}`;
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body:    new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion:  jwt,
+    }),
+  });
+
+  const data = await res.json();
+  if (!data.access_token) throw new Error(data.error_description || 'Failed to get access token');
+  return data.access_token;
+}
+
+async function sendNotification() {
+  hideAlerts();
+
+  if (!serviceAccount) return showError('Please load your service-account.json file first.');
+
+  const title    = document.getElementById('title').value.trim();
+  const body     = document.getElementById('body').value.trim();
+  const url      = document.getElementById('url').value.trim();
+  const priority = document.querySelector('input[name="priority"]:checked')?.value || 'high';
+
+  if (!title) return showError('Title is required.');
+  if (!body)  return showError('Message body is required.');
+
+  const btn = document.getElementById('sendBtn');
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  try {
+    const token = await getAccessToken();
+    const data  = { title, body, priority };
+    if (url) data.url = url;
+
+    const res = await fetch(
+      `https://fcm.googleapis.com/v1/projects/${PROJECT_ID}/messages:send`,
+      {
+        method:  'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type':  'application/json',
+        },
+        body: JSON.stringify({ message: { topic: 'all', data } }),
+      }
+    );
+
+    const result = await res.json();
+
+    if (result.name) {
+      showSuccess('Notification sent successfully.');
+    } else {
+      showError(result.error?.message || JSON.stringify(result.error));
+    }
+  } catch (e) {
+    showError(e.message || 'Unknown error occurred.');
+  } finally {
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+}
+
+function showSuccess(msg) {
+  document.getElementById('successMsg').textContent = msg;
+  document.getElementById('alertSuccess').classList.add('show');
+}
+
+function showError(msg) {
+  document.getElementById('errorMsg').textContent = msg;
+  document.getElementById('alertError').classList.add('show');
+}
+
+function hideAlerts() {
+  document.getElementById('alertSuccess').classList.remove('show');
+  document.getElementById('alertError').classList.remove('show');
+}
+</script>
+</body>
+</html>
