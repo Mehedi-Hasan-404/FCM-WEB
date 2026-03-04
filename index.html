@@ -3,37 +3,272 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Open Stream</title>
-
+<title>Stream Launcher</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
 <style>
-body{
-    font-family: Arial, sans-serif;
-    background:#111827;
-    color:white;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:100vh;
-    margin:0;
-}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-button{
-    padding:16px 28px;
-    font-size:18px;
-    border:none;
-    border-radius:8px;
-    background:#22c55e;
-    color:white;
-    cursor:pointer;
-}
+  :root {
+    --green: #22c55e;
+    --green-glow: rgba(34,197,94,0.35);
+    --bg: #0a0f1a;
+    --surface: #111827;
+    --surface2: #1a2540;
+    --border: rgba(255,255,255,0.07);
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --red: #ef4444;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(34,197,94,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34,197,94,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(34,197,94,0.07) 0%, transparent 70%);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px 36px;
+    width: 100%;
+    max-width: 400px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(34,197,94,0.08);
+  }
+
+  .live-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(239,68,68,0.12);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: var(--red);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .live-dot {
+    width: 6px; height: 6px;
+    background: var(--red);
+    border-radius: 50%;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 30px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  h1 span { color: var(--green); }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  /* THE KEY: a real <a> tag wrapping the button */
+  /* intent with NO package= forces Android to show the full chooser */
+  .play-link {
+    display: block;
+    text-decoration: none;
+    margin-bottom: 12px;
+  }
+
+  .btn-play {
+    width: 100%;
+    padding: 18px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 4px 24px var(--green-glow);
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-play::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.12), transparent);
+  }
+
+  .play-link:hover .btn-play  { transform: translateY(-2px); box-shadow: 0 8px 32px var(--green-glow); }
+  .play-link:active .btn-play { transform: translateY(0); }
+
+  .hint {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--muted);
+    font-size: 11px;
+    margin-bottom: 16px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* Copy URL row */
+  .url-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 12px;
+  }
+
+  .url-text {
+    flex: 1;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+    line-height: 1.4;
+    user-select: all;
+  }
+
+  .btn-copy {
+    flex-shrink: 0;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid rgba(34,197,94,0.3);
+    border-radius: 6px;
+    background: rgba(34,197,94,0.08);
+    color: var(--green);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn-copy:hover { background: rgba(34,197,94,0.18); }
+  .btn-copy.copied { background: rgba(34,197,94,0.25); border-color: var(--green); }
 </style>
 </head>
-
 <body>
 
-<a href="intent://103.161.153.165:8000/play/a00w/index.m3u8#Intent;scheme=http;action=android.intent.action.VIEW;type=application/x-mpegURL;end">
-<button>Play Stream</button>
-</a>
+<div class="card">
+
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    LIVE
+  </div>
+
+  <h1>Open <span>Stream</span></h1>
+  <p class="subtitle">Tap Play — Android will show a list of all media players installed on your device.</p>
+
+  <!--
+    ✅ THE CORRECT TECHNIQUE:
+    - Real <a> tag (not JS) so Chrome allows it
+    - NO package= so Android shows the full "Open with" chooser
+    - type=video/x-mpegURL so only video apps appear
+    - S.browser_fallback_url so it doesn't silently fail
+  -->
+  <a class="play-link"
+     href="intent://103.161.153.165:8000/play/a00w/index.m3u8#Intent;scheme=http;action=android.intent.action.VIEW;type=video/x-mpegURL;S.browser_fallback_url=http%3A%2F%2F103.161.153.165%3A8000%2Fplay%2Fa00w%2Findex.m3u8;end">
+    <div class="btn-play">▶&nbsp; PLAY STREAM</div>
+  </a>
+
+  <p class="hint">📱 Opens "Complete action using…" dialog on Android</p>
+
+  <div class="divider">no app installed?</div>
+
+  <div class="url-row">
+    <div class="url-text" id="urlText">http://103.161.153.165:8000/play/a00w/index.m3u8</div>
+    <button class="btn-copy" id="copyBtn" onclick="copyURL()">Copy URL</button>
+  </div>
+
+</div>
+
+<script>
+  function copyURL() {
+    const url = document.getElementById('urlText').textContent;
+    const btn = document.getElementById('copyBtn');
+    navigator.clipboard.writeText(url).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = url;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    });
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = 'Copy URL';
+      btn.classList.remove('copied');
+    }, 2500);
+  }
+</script>
 
 </body>
 </html>
