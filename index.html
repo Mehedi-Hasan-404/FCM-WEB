@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Play Stream</title>
+<title>Open Stream</title>
 
 <style>
 body{
     font-family: Arial, sans-serif;
-    background:#0f172a;
+    background:#111827;
     color:white;
     display:flex;
     justify-content:center;
@@ -17,37 +17,23 @@ body{
     margin:0;
 }
 
-.container{
-    text-align:center;
-}
-
 button{
-    background:#22c55e;
-    border:none;
-    padding:16px 30px;
+    padding:16px 28px;
     font-size:18px;
+    border:none;
+    border-radius:8px;
+    background:#22c55e;
     color:white;
-    border-radius:10px;
     cursor:pointer;
 }
-
-button:hover{
-    background:#16a34a;
-}
 </style>
-
 </head>
 
 <body>
 
-<div class="container">
-    <h1>Stream Player</h1>
-    <p>Tap the button to open the stream in your media player</p>
-
-    <a href="intent://103.161.153.165:8000/play/a00w/index.m3u8#Intent;action=android.intent.action.VIEW;type=application/x-mpegURL;end">
-        <button>▶ Play Stream</button>
-    </a>
-</div>
+<a href="intent://103.161.153.165:8000/play/a00w/index.m3u8#Intent;scheme=http;action=android.intent.action.VIEW;type=application/x-mpegURL;end">
+<button>Play Stream</button>
+</a>
 
 </body>
 </html>
